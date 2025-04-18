@@ -1,0 +1,121 @@
+services:
+  server1:
+    build: 
+      dockerfile: Dockerfile
+    ports:
+      - "4242:4242"
+    volumes:
+      - type: bind
+        source: server.py
+        target: /opt/lab/server.py
+      - type: volume
+        source: lab-cache
+        target: /mnt/cache
+    entrypoint:
+      - python3
+      - /opt/lab/server.py
+    command: "-id 1 -apikey KYIRJNRN6DWM0TS2"
+    networks:
+      - phase-1-network
+  server2:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "4243:4243"
+    volumes:
+      - type: bind
+        source: server.py
+        target: /opt/lab/server.py
+      - type: volume
+        source: lab-cache
+        target: /mnt/cache
+    entrypoint:
+      - python3
+      - /opt/lab/server.py
+    command: "-id 2 -apikey LNSLJZM8VWGR6KAA"
+    networks:
+      - phase-1-network
+    depends_on:
+      - server1
+  server3:
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "4244:4244"
+    volumes:
+      - type: bind
+        source: server.py
+        target: /opt/lab/server.py
+      - type: volume
+        source: lab-cache
+        target: /mnt/cache
+    entrypoint:
+      - python3
+      - /opt/lab/server.py
+    command: "-id 3 -apikey IWNBVYRGXW2AMJGY"
+    networks:
+      - phase-1-network
+    depends_on:
+      - server2
+  nginx:
+    build:
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "4200:4200"
+    volumes:
+      - type: bind
+        source: nginx.conf
+        target: /etc/nginx/nginx.conf
+    networks:
+      - phase-1-network
+    depends_on:
+      - server3
+  client:
+    build: 
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: client.py
+        target: /opt/lab/client.py
+    entrypoint:
+      - python3
+      - /opt/lab/client.py
+    command: "-id 1"
+    networks:
+      - phase-1-network
+    depends_on:
+      - nginx
+  client2:
+    build: 
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: client.py
+        target: /opt/lab/client.py
+    entrypoint:
+      - python3
+      - /opt/lab/client.py
+    command: "-id 2"
+    networks:
+      - phase-1-network
+    depends_on:
+      - client
+  shutdown:
+    build: 
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: shutdown.py
+        target: /opt/lab/shutdown.py
+    entrypoint:
+      - python3
+      - /opt/lab/shutdown.py
+    networks:
+      - phase-1-network
+    depends_on:
+      - client
+      - nginx
+networks:
+  phase-1-network:
+volumes:
+  lab-cache:

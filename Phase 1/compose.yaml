@@ -1,0 +1,38 @@
+services:
+  server:
+    build: 
+      dockerfile: Dockerfile
+    ports:
+      - "4242:4242"
+    volumes:
+      - type: bind
+        source: .\server.py
+        target: /opt/lab/server.py
+      - type: volume
+        source: lab-cache
+        target: /mnt/cache
+    networks:
+      - phase-1-network
+    entrypoint:
+      - python3
+      - /opt/lab/server.py
+    command: "-id 1 -apikey KYIRJNRN6DWM0TS2"
+  client:
+    build: 
+      dockerfile: Dockerfile
+    volumes:
+      - type: bind
+        source: .\client.py
+        target: /opt/lab/client.py
+    networks:
+      - phase-1-network
+    entrypoint:
+      - python3
+      - /opt/lab/client.py
+    command: "-id 1"
+    depends_on:
+      - server
+networks:
+  phase-1-network:
+volumes:
+  lab-cache:
