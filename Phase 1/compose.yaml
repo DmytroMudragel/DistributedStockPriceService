@@ -16,7 +16,7 @@ services:
     entrypoint:
       - python3
       - /opt/lab/server.py
-    command: "-id 1 -apikey KYIRJNRN6DWM0TS2"
+    command: "-id 1 -apikey "
   client:
     build: 
       dockerfile: Dockerfile
